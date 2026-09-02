@@ -21,33 +21,57 @@ export default function DashboardLayout({ onLogout, t, isDark, bgCard, bgInput }
   }, []);
 
   const fetchTasks = async () => {
-    const { data, error } = await supabase.from('tasks').select('*').order('created_at', { ascending: false });
-    if (!error && data) setTasks(data);
+    try {
+      const { data, error } = await supabase.from('tasks').select('*').order('created_at', { ascending: false });
+      if (error) {
+        alert("خطأ أثناء جلب المهام: " + error.message);
+      } else if (data) {
+        setTasks(data);
+      }
+    } catch (err) {
+      alert("خطأ في الاتصال بقاعدة البيانات: " + err.message);
+    }
   };
 
   const handleAddTask = async (e) => {
     e.preventDefault();
     if (!newTaskText.trim()) return;
 
-    const { data, error } = await supabase
-      .from('tasks')
-      .insert([{ title: newTaskText, dept_key: newTaskDept, completed: false }])
-      .select();
+    try {
+      const { data, error } = await supabase
+        .from('tasks')
+        .insert([{ title: newTaskText.trim(), dept_key: newTaskDept, completed: false }])
+        .select();
 
-    if (!error && data) {
-      setTasks([data[0], ...tasks]);
-      setNewTaskText('');
+      if (error) {
+        alert("خطأ أثناء إضافة المهمة: " + error.message);
+        console.error(error);
+        return;
+      }
+
+      if (data && data.length > 0) {
+        setTasks([data[0], ...tasks]);
+        setNewTaskText('');
+      }
+    } catch (err) {
+      alert("حدث خطأ غير متوقع: " + err.message);
     }
   };
 
   const toggleTask = async (id, currentStatus) => {
-    const { error } = await supabase
-      .from('tasks')
-      .update({ completed: !currentStatus })
-      .eq('id', id);
+    try {
+      const { error } = await supabase
+        .from('tasks')
+        .update({ completed: !currentStatus })
+        .eq('id', id);
 
-    if (!error) {
-      setTasks(tasks.map(t => t.id === id ? { ...t, completed: !currentStatus } : t));
+      if (error) {
+        alert("خطأ أثناء تحديث حالة المهمة: " + error.message);
+      } else {
+        setTasks(tasks.map(t => t.id === id ? { ...t, completed: !currentStatus } : t));
+      }
+    } catch (err) {
+      alert("حدث خطأ: " + err.message);
     }
   };
 
@@ -123,14 +147,14 @@ export default function DashboardLayout({ onLogout, t, isDark, bgCard, bgInput }
                 <option value="deptHealth">{t.deptHealth}</option>
                 <option value="deptFinance">{t.deptFinance}</option>
               </select>
-              <button type="submit" className="bg-amber-500 text-slate-950 px-4 rounded-xl font-bold"><Plus size={18} /></button>
+              <button type="submit" className="bg-amber-500 text-slate-950 px-4 rounded-xl font-bold hover:bg-amber-400 transition"><Plus size={18} /></button>
             </form>
 
             <div className="space-y-2.5">
               {tasks.map((task) => (
                 <div key={task.id} onClick={() => toggleTask(task.id, task.completed)} className={`p-4 rounded-2xl border cursor-pointer flex items-center justify-between ${task.completed ? 'opacity-40 line-through' : bgInput}`}>
                   <span className="text-sm font-medium">{task.title}</span>
-                  <span className="text-[11px] px-2.5 py-1 rounded-lg bg-amber-500/10 text-amber-500 font-bold">{t[task.dept_key]}</span>
+                  <span className="text-[11px] px-2.5 py-1 rounded-lg bg-amber-500/10 text-amber-500 font-bold">{t[task.dept_key] || task.dept_key}</span>
                 </div>
               ))}
             </div>

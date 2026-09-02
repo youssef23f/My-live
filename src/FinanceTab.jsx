@@ -13,30 +13,53 @@ export default function FinanceTab({ bgCard, bgInput }) {
   }, []);
 
   const fetchExpenses = async () => {
-    const { data, error } = await supabase.from('expenses').select('*').order('created_at', { ascending: false });
-    if (!error && data) setExpenses(data);
+    try {
+      const { data, error } = await supabase.from('expenses').select('*').order('created_at', { ascending: false });
+      if (error) {
+        alert("خطأ جلب المصروفات: " + error.message);
+      } else if (data) {
+        setExpenses(data);
+      }
+    } catch (err) {
+      alert("خطأ اتصال المالية: " + err.message);
+    }
   };
 
   const addExpense = async (e) => {
     e.preventDefault();
-    if (!title || !amount) return;
+    if (!title.trim() || !amount) return;
 
-    const { data, error } = await supabase
-      .from('expenses')
-      .insert([{ title, amount: Number(amount) }])
-      .select();
+    try {
+      const { data, error } = await supabase
+        .from('expenses')
+        .insert([{ title: title.trim(), amount: Number(amount) }])
+        .select();
 
-    if (!error && data) {
-      setExpenses([data[0], ...expenses]);
-      setTitle('');
-      setAmount('');
+      if (error) {
+        alert("خطأ مالية أثناء الإضافة: " + error.message);
+        return;
+      }
+
+      if (data && data.length > 0) {
+        setExpenses([data[0], ...expenses]);
+        setTitle('');
+        setAmount('');
+      }
+    } catch (err) {
+      alert("خطأ: " + err.message);
     }
   };
 
   const deleteExpense = async (id) => {
-    const { error } = await supabase.from('expenses').delete().eq('id', id);
-    if (!error) {
-      setExpenses(expenses.filter(e => e.id !== id));
+    try {
+      const { error } = await supabase.from('expenses').delete().eq('id', id);
+      if (error) {
+        alert("خطأ مسح المصروف: " + error.message);
+      } else {
+        setExpenses(expenses.filter(e => e.id !== id));
+      }
+    } catch (err) {
+      alert("خطأ: " + err.message);
     }
   };
 

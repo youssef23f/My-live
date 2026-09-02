@@ -13,39 +13,67 @@ export default function EducationTab({ bgCard, bgInput }) {
   }, []);
 
   const fetchCourses = async () => {
-    const { data, error } = await supabase.from('courses').select('*').order('created_at', { ascending: false });
-    if (!error && data) setCourses(data);
+    try {
+      const { data, error } = await supabase.from('courses').select('*').order('created_at', { ascending: false });
+      if (error) {
+        alert("خطأ جلب الكورسات: " + error.message);
+      } else if (data) {
+        setCourses(data);
+      }
+    } catch (err) {
+      alert("خطأ اتصال الكورسات: " + err.message);
+    }
   };
 
   const addCourse = async (e) => {
     e.preventDefault();
-    if (!newCourseName || !newCourseHours) return;
+    if (!newCourseName.trim() || !newCourseHours) return;
 
-    const { data, error } = await supabase
-      .from('courses')
-      .insert([{ name: newCourseName, hours: Number(newCourseHours), completed_hours: 0 }])
-      .select();
+    try {
+      const { data, error } = await supabase
+        .from('courses')
+        .insert([{ name: newCourseName.trim(), hours: Number(newCourseHours), completed_hours: 0 }])
+        .select();
 
-    if (!error && data) {
-      setCourses([data[0], ...courses]);
-      setNewCourseName('');
-      setNewCourseHours('');
+      if (error) {
+        alert("خطأ إضافة كورس: " + error.message);
+        return;
+      }
+
+      if (data && data.length > 0) {
+        setCourses([data[0], ...courses]);
+        setNewCourseName('');
+        setNewCourseHours('');
+      }
+    } catch (err) {
+      alert("خطأ غير متوقع: " + err.message);
     }
   };
 
   const updateProgress = async (id, currentHours, totalHours, delta) => {
     const newHours = Math.min(Math.max(0, currentHours + delta), totalHours);
-    const { error } = await supabase.from('courses').update({ completed_hours: newHours }).eq('id', id);
-
-    if (!error) {
-      setCourses(courses.map(c => c.id === id ? { ...c, completed_hours: newHours } : c));
+    try {
+      const { error } = await supabase.from('courses').update({ completed_hours: newHours }).eq('id', id);
+      if (error) {
+        alert("خطأ تحديث الساعات: " + error.message);
+      } else {
+        setCourses(courses.map(c => c.id === id ? { ...c, completed_hours: newHours } : c));
+      }
+    } catch (err) {
+      alert("خطأ: " + err.message);
     }
   };
 
   const deleteCourse = async (id) => {
-    const { error } = await supabase.from('courses').delete().eq('id', id);
-    if (!error) {
-      setCourses(courses.filter(c => c.id !== id));
+    try {
+      const { error } = await supabase.from('courses').delete().eq('id', id);
+      if (error) {
+        alert("خطأ مسح الكورس: " + error.message);
+      } else {
+        setCourses(courses.filter(c => c.id !== id));
+      }
+    } catch (err) {
+      alert("خطأ: " + err.message);
     }
   };
 

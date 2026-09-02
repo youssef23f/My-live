@@ -12,18 +12,32 @@ export default function ForeignTab({ bgCard, bgInput }) {
   }, []);
 
   const fetchChecklist = async () => {
-    const { data, error } = await supabase.from('foreign_checklist').select('*').order('created_at', { ascending: false });
-    if (!error && data) setChecklist(data);
+    try {
+      const { data, error } = await supabase.from('foreign_checklist').select('*').order('created_at', { ascending: false });
+      if (error) {
+        alert("خطأ جلب قائمة الهجرة: " + error.message);
+      } else if (data) {
+        setChecklist(data);
+      }
+    } catch (err) {
+      alert("خطأ في الاتصال: " + err.message);
+    }
   };
 
   const toggleCheck = async (id, currentStatus) => {
-    const { error } = await supabase
-      .from('foreign_checklist')
-      .update({ done: !currentStatus })
-      .eq('id', id);
+    try {
+      const { error } = await supabase
+        .from('foreign_checklist')
+        .update({ done: !currentStatus })
+        .eq('id', id);
 
-    if (!error) {
-      setChecklist(checklist.map(item => item.id === id ? { ...item, done: !currentStatus } : item));
+      if (error) {
+        alert("خطأ تحديث الشطب: " + error.message);
+      } else {
+        setChecklist(checklist.map(item => item.id === id ? { ...item, done: !currentStatus } : item));
+      }
+    } catch (err) {
+      alert("خطأ: " + err.message);
     }
   };
 
@@ -31,14 +45,23 @@ export default function ForeignTab({ bgCard, bgInput }) {
     e.preventDefault();
     if (!newItem.trim()) return;
 
-    const { data, error } = await supabase
-      .from('foreign_checklist')
-      .insert([{ text: newItem, done: false }])
-      .select();
+    try {
+      const { data, error } = await supabase
+        .from('foreign_checklist')
+        .insert([{ text: newItem.trim(), done: false }])
+        .select();
 
-    if (!error && data) {
-      setChecklist([data[0], ...checklist]);
-      setNewItem('');
+      if (error) {
+        alert("خطأ إضافة متطلب جديد: " + error.message);
+        return;
+      }
+
+      if (data && data.length > 0) {
+        setChecklist([data[0], ...checklist]);
+        setNewItem('');
+      }
+    } catch (err) {
+      alert("خطأ غير متوقع: " + err.message);
     }
   };
 
@@ -73,9 +96,11 @@ export default function ForeignTab({ bgCard, bgInput }) {
             placeholder="أضف شرطاً جديداً..." 
             value={newItem}
             onChange={(e) => setNewItem(e.target.value)}
-            className={`flex-1 ${bgInput} rounded-xl px-4 py-2 text-sm focus:outline-none focus:border-amber-500`}
+            className={`flex-1 ${bgInput} rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-amber-500`}
           />
-          <button type="submit" className="bg-amber-500 text-slate-950 font-bold px-4 rounded-xl">+</button>
+          <button type="submit" className="bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold px-4 rounded-xl flex items-center justify-center">
+            <Plus size={18} />
+          </button>
         </form>
 
         {checklist.map(item => (

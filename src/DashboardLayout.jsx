@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { 
   LayoutDashboard, BookOpen, HeartPulse, Wallet, Globe, 
-  LogOut, Sparkles, CheckCircle2, Plus, Calendar 
+  LogOut, Sparkles, CheckCircle2, Plus, Calendar, Shield 
 } from 'lucide-react';
 import { supabase } from './supabaseClient';
 
@@ -10,7 +10,7 @@ import HealthTab from './HealthTab';
 import FinanceTab from './FinanceTab';
 import ForeignTab from './ForeignTab';
 import ScheduleTab from './ScheduleTab';
-
+import StrategyTab from './StrategyTab';
 
 export default function DashboardLayout({ onLogout, t, isDark, bgCard, bgInput }) {
   const [activeTab, setActiveTab] = useState('dashboard');
@@ -79,6 +79,7 @@ export default function DashboardLayout({ onLogout, t, isDark, bgCard, bgInput }
 
   return (
     <div className="min-h-screen flex flex-col md:flex-row">
+      {/* القائمة الجانبية (Sidebar) */}
       <aside className={`w-full md:w-72 ${bgCard} border-b md:border-b-0 ltr:md:border-r rtl:md:border-l p-6 flex flex-col justify-between shrink-0`}>
         <div>
           <div className="flex items-center gap-3 mb-8 p-3 rounded-2xl bg-amber-500/10 border border-amber-500/20">
@@ -92,6 +93,9 @@ export default function DashboardLayout({ onLogout, t, isDark, bgCard, bgInput }
           <nav className="space-y-1.5">
             <button onClick={() => setActiveTab('dashboard')} className={`w-full flex items-center gap-3 px-3.5 py-3 rounded-2xl text-xs font-semibold transition ${activeTab === 'dashboard' ? 'bg-amber-500 text-slate-950 font-bold' : 'text-slate-400 hover:text-amber-400'}`}>
               <LayoutDashboard size={18} /> <span>{t.navDashboard}</span>
+            </button>
+            <button onClick={() => setActiveTab('strategy')} className={`w-full flex items-center gap-3 px-3.5 py-3 rounded-2xl text-xs font-semibold transition ${activeTab === 'strategy' ? 'bg-amber-500 text-slate-950 font-bold' : 'text-slate-400 hover:text-amber-400'}`}>
+              <Shield size={18} /> <span>القرارات والاستراتيجيات</span>
             </button>
             <button onClick={() => setActiveTab('schedule')} className={`w-full flex items-center gap-3 px-3.5 py-3 rounded-2xl text-xs font-semibold transition ${activeTab === 'schedule' ? 'bg-amber-500 text-slate-950 font-bold' : 'text-slate-400 hover:text-amber-400'}`}>
               <Calendar size={18} /> <span>جدولي الأسبوعي</span>
@@ -118,6 +122,7 @@ export default function DashboardLayout({ onLogout, t, isDark, bgCard, bgInput }
         </div>
       </aside>
 
+      {/* المحتوى الرئيسي (Main Content Area) */}
       <main className="flex-1 p-4 md:p-8 overflow-y-auto space-y-6 pt-16 md:pt-8">
         <div className={`p-6 rounded-3xl border ${bgCard} shadow-xl`}>
           <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
@@ -131,6 +136,7 @@ export default function DashboardLayout({ onLogout, t, isDark, bgCard, bgInput }
           </div>
         </div>
 
+        {/* لوحة التحكم الرئيسية */}
         {activeTab === 'dashboard' && (
           <div className={`p-6 rounded-3xl border ${bgCard} shadow-lg space-y-6`}>
             <h3 className="font-bold text-lg flex items-center gap-2.5">
@@ -166,6 +172,8 @@ export default function DashboardLayout({ onLogout, t, isDark, bgCard, bgInput }
           </div>
         )}
 
+        {/* التبويبات الأخرى */}
+        {activeTab === 'strategy' && <StrategyTab bgCard={bgCard} bgInput={bgInput} />}
         {activeTab === 'schedule' && <ScheduleTab bgCard={bgCard} bgInput={bgInput} />}
         {activeTab === 'education' && <EducationTab bgCard={bgCard} bgInput={bgInput} />}
         {activeTab === 'health' && <HealthTab bgCard={bgCard} bgInput={bgInput} />}

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { 
   LayoutDashboard, BookOpen, HeartPulse, Wallet, Globe, 
-  LogOut, Sparkles, CheckCircle2, Plus 
+  LogOut, Sparkles, CheckCircle2, Plus, Calendar 
 } from 'lucide-react';
 import { supabase } from './supabaseClient';
 
@@ -9,6 +9,8 @@ import EducationTab from './EducationTab';
 import HealthTab from './HealthTab';
 import FinanceTab from './FinanceTab';
 import ForeignTab from './ForeignTab';
+import ScheduleTab from './ScheduleTab';
+
 
 export default function DashboardLayout({ onLogout, t, isDark, bgCard, bgInput }) {
   const [activeTab, setActiveTab] = useState('dashboard');
@@ -91,6 +93,9 @@ export default function DashboardLayout({ onLogout, t, isDark, bgCard, bgInput }
             <button onClick={() => setActiveTab('dashboard')} className={`w-full flex items-center gap-3 px-3.5 py-3 rounded-2xl text-xs font-semibold transition ${activeTab === 'dashboard' ? 'bg-amber-500 text-slate-950 font-bold' : 'text-slate-400 hover:text-amber-400'}`}>
               <LayoutDashboard size={18} /> <span>{t.navDashboard}</span>
             </button>
+            <button onClick={() => setActiveTab('schedule')} className={`w-full flex items-center gap-3 px-3.5 py-3 rounded-2xl text-xs font-semibold transition ${activeTab === 'schedule' ? 'bg-amber-500 text-slate-950 font-bold' : 'text-slate-400 hover:text-amber-400'}`}>
+              <Calendar size={18} /> <span>جدولي الأسبوعي</span>
+            </button>
             <button onClick={() => setActiveTab('education')} className={`w-full flex items-center gap-3 px-3.5 py-3 rounded-2xl text-xs font-semibold transition ${activeTab === 'education' ? 'bg-amber-500 text-slate-950 font-bold' : 'text-slate-400 hover:text-amber-400'}`}>
               <BookOpen size={18} /> <span>{t.navEdu}</span>
             </button>
@@ -161,6 +166,7 @@ export default function DashboardLayout({ onLogout, t, isDark, bgCard, bgInput }
           </div>
         )}
 
+        {activeTab === 'schedule' && <ScheduleTab bgCard={bgCard} bgInput={bgInput} />}
         {activeTab === 'education' && <EducationTab bgCard={bgCard} bgInput={bgInput} />}
         {activeTab === 'health' && <HealthTab bgCard={bgCard} bgInput={bgInput} />}
         {activeTab === 'finance' && <FinanceTab bgCard={bgCard} bgInput={bgInput} />}

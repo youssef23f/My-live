@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { 
   Key, Shield, Wallet, Lightbulb, FileText, 
-  Plus, Trash2, Copy, Eye, EyeOff, Search, Calendar, DollarSign, Check, Sparkles, Lock, Unlock, AlertCircle
+  Plus, Trash2, Copy, Eye, EyeOff, Search, Calendar, DollarSign, Check, Sparkles, Lock, Unlock, AlertCircle, Image
 } from 'lucide-react';
 import { supabase } from './supabaseClient';
 
@@ -10,11 +10,12 @@ export default function MastermindTab() {
   const [passcode, setPasscode] = useState('');
   const [passError, setPassError] = useState(false);
 
-  const [activeSubTab, setActiveSubTab] = useState('accounts'); // accounts, debts, ideas, documents
+  const [activeSubTab, setActiveSubTab] = useState('accounts');
   const [vaultItems, setVaultItems] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [showPasswords, setShowPasswords] = useState({});
   const [copiedId, setCopiedId] = useState(null);
+  const [selectedImage, setSelectedImage] = useState(null);
 
   // Form State
   const [title, setTitle] = useState('');
@@ -23,8 +24,14 @@ export default function MastermindTab() {
   const [amount, setAmount] = useState('');
   const [targetDate, setTargetDate] = useState('');
 
-  // كلمة المرور الافتراضية للوصول (يمكنك تغييرها من هنا)
   const MASTER_PASSWORD = "123321FYD"; 
+
+  // الصور الثلاث الخاصة بالعقل المدبر
+  const galleryImages = [
+    { id: 1, src: '/mastermind-1.jpg', title: 'The Eye Ritual', tag: 'المجلس السري' },
+    { id: 2, src: '/mastermind-2.jpg', title: 'Veritas Invicta', tag: 'الحقيقة المطلقة' },
+    { id: 3, src: '/mastermind-3.jpg', title: 'Arcane Throne', tag: 'الرمز المشفر' }
+  ];
 
   useEffect(() => {
     if (isAuthenticated) {
@@ -83,7 +90,6 @@ export default function MastermindTab() {
         alert("خطأ أثناء الحفظ: " + error.message);
       } else if (data && data.length > 0) {
         setVaultItems([data[0], ...vaultItems]);
-        // Reset Form
         setTitle('');
         setDetails('');
         setSecretInfo('');
@@ -131,10 +137,10 @@ export default function MastermindTab() {
       item.details?.toLowerCase().includes(searchTerm.toLowerCase())
     );
 
-  // شاشة بوابة الدخول بالرمز السري (الأخضر واللبني)
+  // شاشة بوابة الدخول
   if (!isAuthenticated) {
     return (
-      <div className="min-h-[70vh] flex items-center justify-center p-4 dir-rtl font-sans">
+      <div className="min-h-[75vh] flex items-center justify-center p-4 dir-rtl font-sans">
         <div className="relative w-full max-w-md p-8 rounded-3xl bg-emerald-950/40 border border-emerald-500/30 backdrop-blur-2xl shadow-2xl shadow-emerald-950/60 overflow-hidden text-center space-y-6">
           <div className="absolute -top-20 -left-20 w-48 h-48 bg-emerald-500/20 rounded-full blur-3xl pointer-events-none" />
           <div className="absolute -bottom-20 -right-20 w-48 h-48 bg-cyan-500/20 rounded-full blur-3xl pointer-events-none" />
@@ -151,24 +157,22 @@ export default function MastermindTab() {
                 بوابة العقل المدبر المشفرة
               </h2>
               <p className="text-slate-400 text-xs mt-1.5 font-medium">
-                يرجى إدخال رمز الأمان الرئاسي للوصول إلى الخزينة
+                يرجى إدخال رمز الأمان للوصول إلى الغرفة السرية
               </p>
             </div>
 
             <form onSubmit={handleUnlock} className="space-y-4 pt-2">
-              <div className="relative">
-                <input 
-                  type="password" 
-                  placeholder="أدخل كلمة المرور..." 
-                  value={passcode}
-                  onChange={(e) => {
-                    setPasscode(e.target.value);
-                    setPassError(false);
-                  }}
-                  className={`w-full bg-slate-900/90 border ${passError ? 'border-rose-500/80 focus:border-rose-500' : 'border-emerald-500/30 focus:border-cyan-400'} rounded-2xl px-4 py-3 text-sm text-center tracking-widest text-slate-100 placeholder-slate-500 focus:outline-none transition`}
-                  autoFocus
-                />
-              </div>
+              <input 
+                type="password" 
+                placeholder="أدخل كلمة المرور..." 
+                value={passcode}
+                onChange={(e) => {
+                  setPasscode(e.target.value);
+                  setPassError(false);
+                }}
+                className={`w-full bg-slate-900/90 border ${passError ? 'border-rose-500/80' : 'border-emerald-500/30 focus:border-cyan-400'} rounded-2xl px-4 py-3 text-sm text-center tracking-widest text-slate-100 placeholder-slate-500 focus:outline-none transition`}
+                autoFocus
+              />
 
               {passError && (
                 <div className="flex items-center justify-center gap-1.5 text-xs text-rose-400 font-medium">
@@ -181,7 +185,7 @@ export default function MastermindTab() {
                 type="submit" 
                 className="w-full bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-500 text-slate-950 font-bold py-3 rounded-2xl text-xs hover:opacity-90 transition shadow-lg shadow-emerald-500/25 flex items-center justify-center gap-2"
               >
-                <Unlock size={16} /> فتح الخزينة المشفرة
+                <Unlock size={16} /> فتح الخزينة
               </button>
             </form>
           </div>
@@ -190,17 +194,13 @@ export default function MastermindTab() {
     );
   }
 
-  // الصفحة الرئيسية بعد فتح الخزينة
   return (
     <div className="space-y-6 dir-rtl text-slate-100 font-sans">
       
-      {/* الهيدر العلوي بنمط الأخضر واللبني + زر الإغلاق والقفل */}
-      <div className="relative overflow-hidden p-6 md:p-8 rounded-3xl bg-emerald-950/40 border border-emerald-500/30 backdrop-blur-xl shadow-2xl shadow-emerald-950/50 flex flex-col md:flex-row md:items-center justify-between gap-6">
-        <div className="absolute -top-24 -left-24 w-60 h-60 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none" />
-        <div className="absolute -bottom-24 -right-24 w-60 h-60 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none" />
-
+      {/* هيدر الصفحة */}
+      <div className="relative overflow-hidden p-6 md:p-8 rounded-3xl bg-emerald-950/40 border border-emerald-500/30 backdrop-blur-xl shadow-2xl flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div className="relative z-10">
-          <div className="inline-flex items-center gap-2 bg-emerald-500/15 border border-emerald-500/30 px-3.5 py-1 rounded-full text-emerald-400 text-xs font-bold mb-3 shadow-inner">
+          <div className="inline-flex items-center gap-2 bg-emerald-500/15 border border-emerald-500/30 px-3.5 py-1 rounded-full text-emerald-400 text-xs font-bold mb-3">
             <Shield size={14} className="text-cyan-400" />
             <span>العقل المدبر الرئاسي • Mastermind Vault</span>
           </div>
@@ -208,11 +208,10 @@ export default function MastermindTab() {
             غرفة العمليات المركزية والسرية
           </h2>
           <p className="text-slate-300 text-xs md:text-sm mt-1.5 font-medium">
-            إدارة الخزينة المشفرة: الحسابات، الأفكار البرمجية، الأوراق الرسمية، وخريطة الديون.
+            إدارة الخزينة المشفرة والمعرض الرمزي الخاص بالقيادة.
           </p>
         </div>
 
-        {/* شريط البحث + زر القفل */}
         <div className="flex items-center gap-3 w-full md:w-auto z-10">
           <div className="relative flex-1 md:w-64">
             <Search size={16} className="absolute right-3.5 top-3.5 text-cyan-400/70" />
@@ -235,7 +234,56 @@ export default function MastermindTab() {
         </div>
       </div>
 
-      {/* الأزرار العلوية للأقسام الفرعية */}
+      {/* معرض الصور الثلاث الغامض بأسلوب البطاقات الرمزية الفاخرة */}
+      <div className="space-y-3">
+        <div className="flex items-center gap-2 text-xs font-bold text-cyan-300 px-1">
+          <Image size={16} className="text-emerald-400" />
+          <span>الأيقونات والمعارض الرمزية (Vault Gallery)</span>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {galleryImages.map((img) => (
+            <div 
+              key={img.id}
+              onClick={() => setSelectedImage(img.src)}
+              className="group relative h-48 rounded-3xl overflow-hidden border border-emerald-500/30 bg-slate-900/80 cursor-pointer shadow-xl transition-all duration-500 hover:scale-[1.02] hover:border-cyan-400"
+            >
+              <img 
+                src={img.src} 
+                alt={img.title} 
+                className="w-full h-full object-cover opacity-75 group-hover:opacity-100 transition duration-500 group-hover:scale-110"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/20 to-transparent opacity-90" />
+              
+              <div className="absolute bottom-4 right-4 left-4 flex items-center justify-between text-xs">
+                <div>
+                  <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/20 border border-emerald-500/40 text-emerald-300 font-mono">
+                    {img.tag}
+                  </span>
+                  <h4 className="font-bold text-slate-100 mt-1">{img.title}</h4>
+                </div>
+                <div className="p-2 rounded-xl bg-slate-900/80 border border-cyan-500/30 text-cyan-300 group-hover:bg-cyan-500 group-hover:text-slate-950 transition">
+                  <Eye size={14} />
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Lightbox / معاينة الصورة بحجم كامل عند الضغط عليها */}
+      {selectedImage && (
+        <div 
+          onClick={() => setSelectedImage(null)}
+          className="fixed inset-0 z-50 bg-slate-950/90 backdrop-blur-md flex items-center justify-center p-4 cursor-pointer"
+        >
+          <div className="relative max-w-2xl max-h-[85vh] rounded-3xl overflow-hidden border border-emerald-500/40 shadow-2xl">
+            <img src={selectedImage} alt="Full Preview" className="w-full h-full object-contain" />
+          </div>
+        </div>
+      )}
+
+      {/* أزرار التنقل بين الأقسام */}
       <div className="flex flex-wrap gap-2.5 border-b border-emerald-500/20 pb-4">
         {[
           { id: 'accounts', label: 'الحسابات والاشتراكات', icon: Key },
@@ -275,11 +323,7 @@ export default function MastermindTab() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
           <input 
             type="text" 
-            placeholder={
-              activeSubTab === 'accounts' ? "اسم المنصة / الخدمة (مثال: OpenAI)" :
-              activeSubTab === 'debts' ? "الجهة أو الشخص (مثال: القسط الأول)" :
-              activeSubTab === 'ideas' ? "عنوان الفكرة / المشروع البرمجي" : "اسم الوثيقة (مثال: رقم الجواز/تأشيرة)"
-            }
+            placeholder="عنوان البند..."
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             className="bg-slate-900/90 border border-emerald-500/30 rounded-2xl px-4 py-2.5 text-xs text-slate-100 placeholder-slate-400 focus:outline-none focus:border-cyan-400"
@@ -288,11 +332,7 @@ export default function MastermindTab() {
 
           <input 
             type="text" 
-            placeholder={
-              activeSubTab === 'accounts' ? "اسم المستخدم / الإيميل" :
-              activeSubTab === 'debts' ? "تفاصيل الدين (لك أو عليك)" :
-              activeSubTab === 'ideas' ? "التقنيات المستخدمة / ملخص الفكرة" : "رقم الوثيقة / جهة الإصدار"
-            }
+            placeholder="التفاصيل أو الوصف..."
             value={details}
             onChange={(e) => setDetails(e.target.value)}
             className="bg-slate-900/90 border border-emerald-500/30 rounded-2xl px-4 py-2.5 text-xs text-slate-100 placeholder-slate-400 focus:outline-none focus:border-cyan-400"
@@ -302,10 +342,7 @@ export default function MastermindTab() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
           <input 
             type={activeSubTab === 'accounts' ? "password" : "text"}
-            placeholder={
-              activeSubTab === 'accounts' ? "كلمة المرور السريّة" :
-              activeSubTab === 'documents' ? "الرابط السري / الكود الحساس" : "ملاحظات إضافية"
-            }
+            placeholder="معلومات سرية / كلمة مرور"
             value={secretInfo}
             onChange={(e) => setSecretInfo(e.target.value)}
             className="bg-slate-900/90 border border-emerald-500/30 rounded-2xl px-4 py-2.5 text-xs text-slate-100 placeholder-slate-400 focus:outline-none focus:border-cyan-400 md:col-span-1"
@@ -314,7 +351,7 @@ export default function MastermindTab() {
           {(activeSubTab === 'debts' || activeSubTab === 'ideas') && (
             <input 
               type="number" 
-              placeholder={activeSubTab === 'debts' ? "المبلغ (بالجنيه/اليورو)" : "الميزانية المتوقعة"}
+              placeholder="المبلغ"
               value={amount}
               onChange={(e) => setAmount(e.target.value)}
               className="bg-slate-900/90 border border-emerald-500/30 rounded-2xl px-4 py-2.5 text-xs text-slate-100 placeholder-slate-400 focus:outline-none focus:border-cyan-400"
@@ -331,13 +368,13 @@ export default function MastermindTab() {
 
         <button 
           type="submit" 
-          className="bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-500 text-slate-950 font-bold px-6 py-2.5 rounded-2xl text-xs hover:opacity-90 transition shadow-lg shadow-emerald-500/20 flex items-center justify-center gap-2 w-full md:w-auto"
+          className="bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-500 text-slate-950 font-bold px-6 py-2.5 rounded-2xl text-xs hover:opacity-90 transition shadow-lg flex items-center justify-center gap-2 w-full md:w-auto"
         >
           <Plus size={16} /> حفظ في العقل المدبر
         </button>
       </form>
 
-      {/* بطاقات البيانات المسجلة */}
+      {/* قائمة العناصر */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {filteredItems.length === 0 ? (
           <div className="p-8 rounded-3xl bg-emerald-950/20 border border-emerald-500/10 text-center text-slate-400 text-xs md:col-span-2">
@@ -347,7 +384,7 @@ export default function MastermindTab() {
           filteredItems.map(item => (
             <div 
               key={item.id} 
-              className="group p-5 rounded-3xl bg-slate-900/80 border border-emerald-500/20 hover:border-cyan-400/50 transition-all duration-300 shadow-lg hover:shadow-cyan-500/10 flex flex-col justify-between space-y-3 relative overflow-hidden"
+              className="group p-5 rounded-3xl bg-slate-900/80 border border-emerald-500/20 hover:border-cyan-400/50 transition duration-300 shadow-lg flex flex-col justify-between space-y-3 relative overflow-hidden"
             >
               <div className="absolute top-0 right-0 w-2 h-full bg-gradient-to-b from-emerald-500 to-cyan-500 opacity-60 group-hover:opacity-100 transition" />
 

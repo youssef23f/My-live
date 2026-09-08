@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { 
   Key, Shield, Wallet, Lightbulb, FileText, 
-  Plus, Trash2, Copy, Eye, EyeOff, Search, Calendar, DollarSign, Check, Sparkles, Lock, Unlock, AlertCircle, Image
+  Plus, Trash2, Copy, Eye, EyeOff, Search, Calendar, DollarSign, Check, Sparkles, Lock, Unlock, AlertCircle, Image, Clock, Globe
 } from 'lucide-react';
 import { supabase } from './supabaseClient';
 
@@ -24,20 +24,49 @@ export default function MastermindTab() {
   const [amount, setAmount] = useState('');
   const [targetDate, setTargetDate] = useState('');
 
-  const MASTER_PASSWORD = "123321FYD"; 
+  // حالة الوقت للساعات
+  const [time, setTime] = useState(new Date());
 
-  // الصور الثلاث الخاصة بالعقل المدبر
+  const MASTER_PASSWORD = "123321FYD"; // كلمة المرور الخاصة بالعقل المدبر
+
+  // قائمة الدول والمناطق الزمنية
+  const timeZones = [
+    { name: 'مصر', flag: '🇪🇬', zone: 'Africa/Cairo' },
+    { name: 'ألمانيا', flag: '🇩🇪', zone: 'Europe/Berlin' },
+    { name: 'العراق', flag: '🇮🇶', zone: 'Asia/Baghdad' },
+    { name: 'السعودية', flag: '🇸🇦', zone: 'Asia/Riyadh' },
+    { name: 'أمريكا (NY)', flag: '🇺🇸', zone: 'America/New_York' }
+  ];
+
+  // معرض الصور الثلاث
   const galleryImages = [
     { id: 1, src: '/mastermind-1.jpg', title: 'The Eye Ritual', tag: 'المجلس السري' },
     { id: 2, src: '/mastermind-2.jpg', title: 'Veritas Invicta', tag: 'الحقيقة المطلقة' },
     { id: 3, src: '/mastermind-3.jpg', title: 'Arcane Throne', tag: 'الرمز المشفر' }
   ];
 
+  // عداد الوقت الحي (يتم التحديث كل ثانية)
+  useEffect(() => {
+    const timer = setInterval(() => setTime(new Date()), 1000);
+    return () => clearInterval(timer);
+  }, []);
+
   useEffect(() => {
     if (isAuthenticated) {
       fetchVaultItems();
     }
   }, [isAuthenticated]);
+
+  // دالة تنسيق الوقت حسب المنطقة الزمنية بدون API
+  const getTimeInZone = (timeZone) => {
+    return new Intl.DateTimeFormat('ar-EG', {
+      timeZone: timeZone,
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+      hour12: true
+    }).format(time);
+  };
 
   const handleUnlock = (e) => {
     e.preventDefault();
@@ -234,7 +263,33 @@ export default function MastermindTab() {
         </div>
       </div>
 
-      {/* معرض الصور الثلاث الغامض بأسلوب البطاقات الرمزية الفاخرة */}
+      {/* قسم الساعات العالمية الرقمية الحية */}
+      <div className="space-y-3">
+        <div className="flex items-center gap-2 text-xs font-bold text-cyan-300 px-1">
+          <Globe size={16} className="text-emerald-400" />
+          <span>الساعات العالمية العابرة للحدود (World Clock)</span>
+        </div>
+
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
+          {timeZones.map((tz, idx) => (
+            <div 
+              key={idx} 
+              className="relative p-4 rounded-3xl bg-slate-900/80 border border-emerald-500/25 backdrop-blur-md shadow-xl flex flex-col items-center text-center space-y-1.5 hover:border-cyan-400/60 transition group overflow-hidden"
+            >
+              <div className="absolute top-0 right-0 left-0 h-1 bg-gradient-to-r from-emerald-500 to-cyan-500 opacity-30 group-hover:opacity-100 transition" />
+              <div className="flex items-center gap-1.5 text-xs font-bold text-slate-300">
+                <span>{tz.flag}</span>
+                <span>{tz.name}</span>
+              </div>
+              <div className="text-sm md:text-base font-black font-mono text-cyan-300 tracking-wider">
+                {getTimeInZone(tz.zone)}
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* معرض الصور الثلاث */}
       <div className="space-y-3">
         <div className="flex items-center gap-2 text-xs font-bold text-cyan-300 px-1">
           <Image size={16} className="text-emerald-400" />
@@ -271,7 +326,7 @@ export default function MastermindTab() {
         </div>
       </div>
 
-      {/* Lightbox / معاينة الصورة بحجم كامل عند الضغط عليها */}
+      {/* Lightbox للمعينة */}
       {selectedImage && (
         <div 
           onClick={() => setSelectedImage(null)}

@@ -1,11 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { 
   LayoutDashboard, BookOpen, HeartPulse, Wallet, Globe, 
-  LogOut, Sparkles, CheckCircle2, Plus, Calendar, Shield 
+  LogOut, Sparkles, CheckCircle2, Plus, Calendar, Shield, Eye 
 } from 'lucide-react';
 import { supabase } from './supabaseClient';
-import { Eye } from 'lucide-react';
-
 
 import EducationTab from './EducationTab';
 import HealthTab from './HealthTab';
@@ -115,6 +113,9 @@ export default function DashboardLayout({ onLogout, t, isDark, bgCard, bgInput }
             <button onClick={() => setActiveTab('foreign')} className={`w-full flex items-center gap-3 px-3.5 py-3 rounded-2xl text-xs font-semibold transition ${activeTab === 'foreign' ? 'bg-amber-500 text-slate-950 font-bold' : 'text-slate-400 hover:text-amber-400'}`}>
               <Globe size={18} /> <span>{t.navForeign}</span>
             </button>
+            <button onClick={() => setActiveTab('mastermind')} className={`w-full flex items-center gap-3 px-3.5 py-3 rounded-2xl text-xs font-semibold transition ${activeTab === 'mastermind' ? 'bg-amber-500 text-slate-950 font-bold' : 'text-slate-400 hover:text-amber-400'}`}>
+              <Eye size={18} /> <span>العقل المدبر</span>
+            </button>
           </nav>
         </div>
 
@@ -124,9 +125,6 @@ export default function DashboardLayout({ onLogout, t, isDark, bgCard, bgInput }
           </button>
         </div>
       </aside>
-          <button onClick={() => setActiveTab('mastermind')} className={`w-full flex items-center gap-3 px-3.5 py-3 rounded-2xl text-xs font-semibold transition ${activeTab === 'mastermind' ? 'bg-amber-500 text-slate-950 font-bold' : 'text-slate-400 hover:text-amber-400'}`}>
-            <Eye size={18} /> <span>العقل المدبر</span>
-          </button>
 
       {/* المحتوى الرئيسي (Main Content Area) */}
       <main className="flex-1 p-4 md:p-8 overflow-y-auto space-y-6 pt-16 md:pt-8">

@@ -4,6 +4,8 @@ import {
   LogOut, Sparkles, CheckCircle2, Plus, Calendar, Shield 
 } from 'lucide-react';
 import { supabase } from './supabaseClient';
+import { Eye } from 'lucide-react';
+
 
 import EducationTab from './EducationTab';
 import HealthTab from './HealthTab';
@@ -11,6 +13,7 @@ import FinanceTab from './FinanceTab';
 import ForeignTab from './ForeignTab';
 import ScheduleTab from './ScheduleTab';
 import StrategyTab from './StrategyTab';
+import MastermindTab from './MastermindTab';
 
 export default function DashboardLayout({ onLogout, t, isDark, bgCard, bgInput }) {
   const [activeTab, setActiveTab] = useState('dashboard');
@@ -121,6 +124,9 @@ export default function DashboardLayout({ onLogout, t, isDark, bgCard, bgInput }
           </button>
         </div>
       </aside>
+          <button onClick={() => setActiveTab('mastermind')} className={`w-full flex items-center gap-3 px-3.5 py-3 rounded-2xl text-xs font-semibold transition ${activeTab === 'mastermind' ? 'bg-amber-500 text-slate-950 font-bold' : 'text-slate-400 hover:text-amber-400'}`}>
+            <Eye size={18} /> <span>العقل المدبر</span>
+          </button>
 
       {/* المحتوى الرئيسي (Main Content Area) */}
       <main className="flex-1 p-4 md:p-8 overflow-y-auto space-y-6 pt-16 md:pt-8">
@@ -179,6 +185,7 @@ export default function DashboardLayout({ onLogout, t, isDark, bgCard, bgInput }
         {activeTab === 'health' && <HealthTab bgCard={bgCard} bgInput={bgInput} />}
         {activeTab === 'finance' && <FinanceTab bgCard={bgCard} bgInput={bgInput} />}
         {activeTab === 'foreign' && <ForeignTab bgCard={bgCard} bgInput={bgInput} />}
+        {activeTab === 'mastermind' && <MastermindTab bgCard={bgCard} bgInput={bgInput} />}
       </main>
     </div>
   );

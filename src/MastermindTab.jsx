@@ -1,11 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { 
   Key, Shield, Wallet, Lightbulb, FileText, 
-  Plus, Trash2, Copy, Eye, EyeOff, Search, Calendar, DollarSign, Check, Sparkles, Lock
+  Plus, Trash2, Copy, Eye, EyeOff, Search, Calendar, DollarSign, Check, Sparkles, Lock, Unlock, AlertCircle
 } from 'lucide-react';
 import { supabase } from './supabaseClient';
 
 export default function MastermindTab() {
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [passcode, setPasscode] = useState('');
+  const [passError, setPassError] = useState(false);
+
   const [activeSubTab, setActiveSubTab] = useState('accounts'); // accounts, debts, ideas, documents
   const [vaultItems, setVaultItems] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
@@ -19,9 +23,25 @@ export default function MastermindTab() {
   const [amount, setAmount] = useState('');
   const [targetDate, setTargetDate] = useState('');
 
+  // كلمة المرور الافتراضية للوصول (يمكنك تغييرها من هنا)
+  const MASTER_PASSWORD = "123321FYD"; 
+
   useEffect(() => {
-    fetchVaultItems();
-  }, []);
+    if (isAuthenticated) {
+      fetchVaultItems();
+    }
+  }, [isAuthenticated]);
+
+  const handleUnlock = (e) => {
+    e.preventDefault();
+    if (passcode === MASTER_PASSWORD) {
+      setIsAuthenticated(true);
+      setPassError(false);
+      setPasscode('');
+    } else {
+      setPassError(true);
+    }
+  };
 
   const fetchVaultItems = async () => {
     try {
@@ -111,10 +131,70 @@ export default function MastermindTab() {
       item.details?.toLowerCase().includes(searchTerm.toLowerCase())
     );
 
+  // شاشة بوابة الدخول بالرمز السري (الأخضر واللبني)
+  if (!isAuthenticated) {
+    return (
+      <div className="min-h-[70vh] flex items-center justify-center p-4 dir-rtl font-sans">
+        <div className="relative w-full max-w-md p-8 rounded-3xl bg-emerald-950/40 border border-emerald-500/30 backdrop-blur-2xl shadow-2xl shadow-emerald-950/60 overflow-hidden text-center space-y-6">
+          <div className="absolute -top-20 -left-20 w-48 h-48 bg-emerald-500/20 rounded-full blur-3xl pointer-events-none" />
+          <div className="absolute -bottom-20 -right-20 w-48 h-48 bg-cyan-500/20 rounded-full blur-3xl pointer-events-none" />
+
+          <div className="relative z-10 space-y-4">
+            <div className="w-16 h-16 mx-auto rounded-2xl bg-gradient-to-tr from-emerald-500 to-cyan-500 p-0.5 shadow-lg shadow-emerald-500/30 flex items-center justify-center">
+              <div className="w-full h-full bg-slate-950 rounded-[14px] flex items-center justify-center">
+                <Lock className="text-cyan-400" size={28} />
+              </div>
+            </div>
+
+            <div>
+              <h2 className="text-2xl font-black bg-gradient-to-r from-emerald-300 via-teal-200 to-cyan-300 bg-clip-text text-transparent">
+                بوابة العقل المدبر المشفرة
+              </h2>
+              <p className="text-slate-400 text-xs mt-1.5 font-medium">
+                يرجى إدخال رمز الأمان الرئاسي للوصول إلى الخزينة
+              </p>
+            </div>
+
+            <form onSubmit={handleUnlock} className="space-y-4 pt-2">
+              <div className="relative">
+                <input 
+                  type="password" 
+                  placeholder="أدخل كلمة المرور..." 
+                  value={passcode}
+                  onChange={(e) => {
+                    setPasscode(e.target.value);
+                    setPassError(false);
+                  }}
+                  className={`w-full bg-slate-900/90 border ${passError ? 'border-rose-500/80 focus:border-rose-500' : 'border-emerald-500/30 focus:border-cyan-400'} rounded-2xl px-4 py-3 text-sm text-center tracking-widest text-slate-100 placeholder-slate-500 focus:outline-none transition`}
+                  autoFocus
+                />
+              </div>
+
+              {passError && (
+                <div className="flex items-center justify-center gap-1.5 text-xs text-rose-400 font-medium">
+                  <AlertCircle size={14} />
+                  <span>كلمة المرور غير صحيحة!</span>
+                </div>
+              )}
+
+              <button 
+                type="submit" 
+                className="w-full bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-500 text-slate-950 font-bold py-3 rounded-2xl text-xs hover:opacity-90 transition shadow-lg shadow-emerald-500/25 flex items-center justify-center gap-2"
+              >
+                <Unlock size={16} /> فتح الخزينة المشفرة
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // الصفحة الرئيسية بعد فتح الخزينة
   return (
     <div className="space-y-6 dir-rtl text-slate-100 font-sans">
       
-      {/* الهيدر العلوي بنمط الأخضر واللبني */}
+      {/* الهيدر العلوي بنمط الأخضر واللبني + زر الإغلاق والقفل */}
       <div className="relative overflow-hidden p-6 md:p-8 rounded-3xl bg-emerald-950/40 border border-emerald-500/30 backdrop-blur-xl shadow-2xl shadow-emerald-950/50 flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div className="absolute -top-24 -left-24 w-60 h-60 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none" />
         <div className="absolute -bottom-24 -right-24 w-60 h-60 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none" />
@@ -132,20 +212,30 @@ export default function MastermindTab() {
           </p>
         </div>
 
-        {/* شريط البحث زجاجي باللون اللبني */}
-        <div className="relative w-full md:w-72 z-10">
-          <Search size={16} className="absolute right-3.5 top-3.5 text-cyan-400/70" />
-          <input 
-            type="text" 
-            placeholder="بحث في الخزينة..." 
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full bg-slate-900/80 border border-cyan-500/30 rounded-2xl pr-10 pl-4 py-2.5 text-xs text-slate-100 placeholder-slate-400 focus:outline-none focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400 transition"
-          />
+        {/* شريط البحث + زر القفل */}
+        <div className="flex items-center gap-3 w-full md:w-auto z-10">
+          <div className="relative flex-1 md:w-64">
+            <Search size={16} className="absolute right-3.5 top-3.5 text-cyan-400/70" />
+            <input 
+              type="text" 
+              placeholder="بحث في الخزينة..." 
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full bg-slate-900/80 border border-cyan-500/30 rounded-2xl pr-10 pl-4 py-2.5 text-xs text-slate-100 placeholder-slate-400 focus:outline-none focus:border-cyan-400 transition"
+            />
+          </div>
+
+          <button 
+            onClick={() => setIsAuthenticated(false)} 
+            className="p-2.5 rounded-2xl bg-rose-500/10 border border-rose-500/20 text-rose-400 hover:bg-rose-500/20 transition flex items-center justify-center"
+            title="قفل الخزينة"
+          >
+            <Lock size={18} />
+          </button>
         </div>
       </div>
 
-      {/* الأزرار العلوية للأقسام الفرعية (تدرج أخضر مع تركواز) */}
+      {/* الأزرار العلوية للأقسام الفرعية */}
       <div className="flex flex-wrap gap-2.5 border-b border-emerald-500/20 pb-4">
         {[
           { id: 'accounts', label: 'الحسابات والاشتراكات', icon: Key },
@@ -172,7 +262,7 @@ export default function MastermindTab() {
         })}
       </div>
 
-      {/* نموذج الإضافة بالخلفية المظلمة والأطراف الخضراء */}
+      {/* نموذج الإضافة */}
       <form onSubmit={handleAddItem} className="p-6 rounded-3xl bg-emerald-950/30 border border-emerald-500/20 backdrop-blur-md shadow-xl space-y-4">
         <h3 className="text-xs font-bold text-cyan-300 flex items-center gap-2">
           <Sparkles size={16} className="text-emerald-400" /> 
@@ -247,7 +337,7 @@ export default function MastermindTab() {
         </button>
       </form>
 
-      {/* بطاقات البيانات المسجلة باللون الأخضر والتأثير الزجاجي اللبني */}
+      {/* بطاقات البيانات المسجلة */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {filteredItems.length === 0 ? (
           <div className="p-8 rounded-3xl bg-emerald-950/20 border border-emerald-500/10 text-center text-slate-400 text-xs md:col-span-2">

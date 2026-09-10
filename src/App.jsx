@@ -1,7 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { Lock, Mail, KeyRound, ShieldCheck, Sun, Moon, Languages } from 'lucide-react';
+import { Lock, ShieldCheck, Sun, Moon, Languages, LayoutDashboard, Flag, Terminal, Beaker, LogOut } from 'lucide-react';
 import { translations } from './translations';
-import DashboardLayout from './DashboardLayout';
+
+// استيراد جميع الأقسام والمكونات الذكية
+import CabinetDashboard from './CabinetDashboard';
+import GermanyReadiness from './GermanyReadiness';
+import PythonSkillTree from './PythonSkillTree';
+import IdeaLab from './IdeaLab';
 
 export default function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -11,8 +16,17 @@ export default function App() {
   
   const [theme, setTheme] = useState('dark');
   const [lang, setLang] = useState('ar');
+  const [activeTab, setActiveTab] = useState('cabinet'); // cabinet | germany | python | lab
 
-  const t = translations[lang];
+  const t = translations[lang] || {
+    dir: 'rtl',
+    loginTitle: 'تسجيل الدخول للمنظومة',
+    loginSub: 'أدخل بياناتك للمتابعة إلى لوحة التحكم',
+    emailLabel: 'البريد الإلكتروني',
+    passLabel: 'كلمة المرور',
+    loginBtn: 'دخول النظام',
+    errorMsg: 'بيانات الدخول غير صحيحة!'
+  };
 
   useEffect(() => {
     const savedAuth = localStorage.getItem('republic_auth');
@@ -60,6 +74,7 @@ export default function App() {
       </div>
 
       {!isAuthenticated ? (
+        /* شاشة تسجيل الدخول */
         <div className="min-h-screen flex items-center justify-center p-4">
           <div className={`w-full max-w-md ${bgCard} border rounded-3xl p-8 shadow-2xl relative overflow-hidden`}>
             <div className="text-center mb-8">
@@ -71,7 +86,7 @@ export default function App() {
             </div>
 
             {errorMessage && (
-              <div className="mb-6 p-3 bg-rose-500/10 border border-rose-500/20 rounded-xl text-rose-400 text-xs">
+              <div className="mb-6 p-3 bg-rose-500/10 border border-rose-500/20 rounded-xl text-rose-400 text-xs text-center font-bold">
                 {errorMessage}
               </div>
             )}
@@ -106,7 +121,97 @@ export default function App() {
           </div>
         </div>
       ) : (
-        <DashboardLayout onLogout={handleLogout} t={t} isDark={isDark} bgCard={bgCard} bgInput={bgInput} />
+        /* لوحة التحكم الرئيسية المنظمة بـ Navigation Tabs */
+        <div className="min-h-screen pb-12">
+          
+          {/* شريط الملاحة العلوي للأقسام */}
+          <header className={`border-b ${isDark ? 'border-slate-800 bg-slate-900/60' : 'border-slate-200 bg-white/60'} backdrop-blur-xl sticky top-0 z-40 px-4 md:px-8 py-4 mb-6`}>
+            <div className="max-w-7xl mx-auto flex flex-col md:flex-row md:items-center justify-between gap-4">
+              
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-amber-500/20 border border-amber-500/40 flex items-center justify-center text-amber-400 font-black">
+                    Y
+                  </div>
+                  <div>
+                    <h1 className="text-sm font-black text-slate-100">Executive Cabinet</h1>
+                    <span className="text-[10px] text-slate-400">Youssef Republic System</span>
+                  </div>
+                </div>
+
+                <button 
+                  onClick={handleLogout} 
+                  className="md:hidden p-2 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-400 text-xs font-bold"
+                >
+                  <LogOut size={16} />
+                </button>
+              </div>
+
+              {/* أزرار التنقل بين المكونات الأربعة */}
+              <nav className="flex items-center gap-1 overflow-x-auto pb-1 md:pb-0 scrollbar-none">
+                <button
+                  onClick={() => setActiveTab('cabinet')}
+                  className={`px-3.5 py-2 rounded-xl text-xs font-bold transition flex items-center gap-2 whitespace-nowrap ${
+                    activeTab === 'cabinet'
+                      ? 'bg-amber-500 text-slate-950 shadow-md'
+                      : 'text-slate-400 hover:bg-slate-800/60 hover:text-slate-200'
+                  }`}
+                >
+                  <LayoutDashboard size={15} /> مجلس الوزراء
+                </button>
+
+                <button
+                  onClick={() => setActiveTab('germany')}
+                  className={`px-3.5 py-2 rounded-xl text-xs font-bold transition flex items-center gap-2 whitespace-nowrap ${
+                    activeTab === 'germany'
+                      ? 'bg-amber-500 text-slate-950 shadow-md'
+                      : 'text-slate-400 hover:bg-slate-800/60 hover:text-slate-200'
+                  }`}
+                >
+                  <Flag size={15} /> مؤشر ألمانيا 🇩🇪
+                </button>
+
+                <button
+                  onClick={() => setActiveTab('python')}
+                  className={`px-3.5 py-2 rounded-xl text-xs font-bold transition flex items-center gap-2 whitespace-nowrap ${
+                    activeTab === 'python'
+                      ? 'bg-amber-500 text-slate-950 shadow-md'
+                      : 'text-slate-400 hover:bg-slate-800/60 hover:text-slate-200'
+                  }`}
+                >
+                  <Terminal size={15} /> مهارات Python 🐍
+                </button>
+
+                <button
+                  onClick={() => setActiveTab('lab')}
+                  className={`px-3.5 py-2 rounded-xl text-xs font-bold transition flex items-center gap-2 whitespace-nowrap ${
+                    activeTab === 'lab'
+                      ? 'bg-amber-500 text-slate-950 shadow-md'
+                      : 'text-slate-400 hover:bg-slate-800/60 hover:text-slate-200'
+                  }`}
+                >
+                  <Beaker size={15} /> القرارات والمختبر ⚖️
+                </button>
+              </nav>
+
+              <button 
+                onClick={handleLogout} 
+                className="hidden md:flex items-center gap-2 px-3.5 py-2 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/20 text-rose-400 text-xs font-bold transition"
+              >
+                <LogOut size={15} /> تسجيل الخروج
+              </button>
+            </div>
+          </header>
+
+          {/* عرض المكون النشط بناءً على الـ Tab المحدد */}
+          <main className="max-w-7xl mx-auto px-4 md:px-8">
+            {activeTab === 'cabinet' && <CabinetDashboard />}
+            {activeTab === 'germany' && <GermanyReadiness />}
+            {activeTab === 'python' && <PythonSkillTree />}
+            {activeTab === 'lab' && <IdeaLab />}
+          </main>
+
+        </div>
       )}
 
     </div>

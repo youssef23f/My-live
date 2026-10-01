@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Lock, ShieldCheck, Sun, Moon, Languages, LayoutDashboard, Flag, Terminal, Beaker, CheckSquare, LogOut } from 'lucide-react';
+import { Lock, ShieldCheck, Sun, Moon, Languages, LayoutDashboard, Flag, Terminal, Beaker, CheckSquare, HeartPulse, LogOut } from 'lucide-react';
 import { translations } from './translations';
 
 // استيراد جميع الأقسام والوحدات التشغيلية
@@ -8,6 +8,7 @@ import GermanyReadiness from './GermanyReadiness';
 import PythonSkillTree from './PythonSkillTree';
 import IdeaLab from './IdeaLab';
 import OperationalCommandCenter from './OperationalCommandCenter';
+import HealthTracker from './HealthTracker';
 
 export default function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -17,7 +18,7 @@ export default function App() {
   
   const [theme, setTheme] = useState('dark');
   const [lang, setLang] = useState('ar');
-  const [activeTab, setActiveTab] = useState('ops'); // افتراضياً على غرفة العمليات (ops | cabinet | germany | python | lab)
+  const [activeTab, setActiveTab] = useState('health'); // (health | ops | cabinet | germany | python | lab)
 
   const t = translations[lang] || {
     dir: 'rtl',
@@ -151,6 +152,17 @@ export default function App() {
               {/* أزرار التنقل بين المكونات */}
               <nav className="flex items-center gap-1 overflow-x-auto pb-1 md:pb-0 scrollbar-none">
                 <button
+                  onClick={() => setActiveTab('health')}
+                  className={`px-3.5 py-2 rounded-xl text-xs font-bold transition flex items-center gap-2 whitespace-nowrap ${
+                    activeTab === 'health'
+                      ? 'bg-amber-500 text-slate-950 shadow-md'
+                      : 'text-slate-400 hover:bg-slate-800/60 hover:text-slate-200'
+                  }`}
+                >
+                  <HeartPulse size={15} /> وزارة الصحة والوزن 🍎
+                </button>
+
+                <button
                   onClick={() => setActiveTab('ops')}
                   className={`px-3.5 py-2 rounded-xl text-xs font-bold transition flex items-center gap-2 whitespace-nowrap ${
                     activeTab === 'ops'
@@ -217,6 +229,7 @@ export default function App() {
 
           {/* عرض المكون النشط */}
           <main className="max-w-7xl mx-auto px-4 md:px-8">
+            {activeTab === 'health' && <HealthTracker />}
             {activeTab === 'ops' && <OperationalCommandCenter />}
             {activeTab === 'cabinet' && <CabinetDashboard />}
             {activeTab === 'germany' && <GermanyReadiness />}
